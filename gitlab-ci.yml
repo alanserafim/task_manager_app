@@ -1,0 +1,71 @@
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_CLIENT_TIMEOUT: 600
+  COMPOSE_HTTP_TIMEOUT: 600
+  DOCKER_BUILDKIT: 0
+  COMPOSE_DOCKER_CLI_BUILD: 0
+ 
+stages:
+  - build
+  - test
+  - deploy
+
+build_job:
+   stage: build
+   image: docker:20.10.16
+   services:
+       - docker:20.10.16-dind
+   script:
+       - docker build -t ex-build-dev:latest .
+
+
+#test_job:
+#   stage: test1
+#   image: golang:1.19
+#   script:
+#      - echo "Testing the app"
+#      - mkdir -p coverage 
+#      - go test -v -coverprofile=coverage.out -covermode=set ./... 
+#      - pwd 
+#      - ls -la coverage 
+#      - cat coverage.out
+#   artifacts:
+#      paths:
+#         - coverage.out
+#      expire_in: 1 week
+
+test-job:
+  stage: test
+  image: python:3.9-slim
+  before_script:
+    - python -m venv venv
+    - source venv/bin/activate
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+  script:
+    - pytest tests/ --cov=app --cov-report=xml  # Substitua "tests/" pelo diretório de seus testes
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+
+deploy_job:
+    stage: deploy
+    image: docker:20.10.16
+    services:
+        - docker:20.10.16-dind
+    before_script:
+        - echo "Remove anterior"
+        - PORT_CONTAINERS=$(docker ps --filter "publish=5000" -q)
+        - echo $PORT_CONTAINERS
+        - if [ -n "$PORT_CONTAINERS" ]; then
+            docker stop $PORT_CONTAINERS;
+            docker rm $PORT_CONTAINERS;
+            sleep 5;
+          fi
+    script:
+        - echo "Deploying the app"
+        - docker run -d -p 5000:5000 ex-build-dev:latest
+
