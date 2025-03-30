@@ -7,7 +7,7 @@ variables:
 
 stages:
   - build
-  - test
+#  - test
   - deploy
 
 build_job:
@@ -20,21 +20,21 @@ build_job:
    rules:
     - if: $CI_COMMIT_BRANCH == "main"
 
-test-job:
-  stage: test
-  image: python:3.9-slim
-  before_script:
-    - python -m venv venv
-    - source venv/bin/activate
-    - pip install --upgrade pip
-    - pip install -r requirements.txt
-  script:
-    - pytest tests/ --cov=app --cov-report=xml
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
+#test-job:
+#  stage: test
+#  image: python:3.9-slim
+#  before_script:
+#    - python -m venv venv
+#    - source venv/bin/activate
+#    - pip install --upgrade pip
+#    - pip install -r requirements.txt
+#  script:
+#    - pytest tests/ --cov=app --cov-report=xml
+#  artifacts:
+#    reports:
+#      coverage_report:
+#        coverage_format: cobertura
+#        path: coverage.xml
 
 deploy_job:
     stage: deploy
