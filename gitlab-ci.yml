@@ -4,7 +4,7 @@ variables:
   COMPOSE_HTTP_TIMEOUT: 600
   DOCKER_BUILDKIT: 0
   COMPOSE_DOCKER_CLI_BUILD: 0
- 
+
 stages:
   - build
   - test
@@ -17,22 +17,8 @@ build_job:
        - docker:20.10.16-dind
    script:
        - docker build -t ex-build-dev:latest .
-
-
-#test_job:
-#   stage: test1
-#   image: golang:1.19
-#   script:
-#      - echo "Testing the app"
-#      - mkdir -p coverage 
-#      - go test -v -coverprofile=coverage.out -covermode=set ./... 
-#      - pwd 
-#      - ls -la coverage 
-#      - cat coverage.out
-#   artifacts:
-#      paths:
-#         - coverage.out
-#      expire_in: 1 week
+   rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
 test-job:
   stage: test
@@ -43,13 +29,12 @@ test-job:
     - pip install --upgrade pip
     - pip install -r requirements.txt
   script:
-    - pytest tests/ --cov=app --cov-report=xml  # Substitua "tests/" pelo diretório de seus testes
+    - pytest tests/ --cov=app --cov-report=xml
   artifacts:
     reports:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-
 
 deploy_job:
     stage: deploy
@@ -68,4 +53,5 @@ deploy_job:
     script:
         - echo "Deploying the app"
         - docker run -d -p 5000:5000 ex-build-dev:latest
-
+    rules:
+       - if: $CI_COMMIT_BRANCH == "main"
