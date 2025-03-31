@@ -30,7 +30,7 @@ unit-test-job:
     - pip install --upgrade pip
     - pip install -r requirements.txt
   script:
-    - pytest unit_tests/ --cov=app --cov-report=xml  # Testes unitários
+    - pytest tests/unit_tests/ --cov=app --cov-report=xml  # Testes unitários
   artifacts:
     reports:
       coverage_report:
@@ -52,7 +52,7 @@ integration-test-job:
     # Configura o banco de dados
     - psql -h postgres -U $POSTGRES_USER -d $POSTGRES_DB -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
   script:
-    - pytest integration_tests/ --cov=app --cov-append  # Testes de integração
+    - pytest tests/integration_tests/ --cov=app --cov-append  # Testes de integração
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
 
