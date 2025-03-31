@@ -4,6 +4,18 @@ variables:
   COMPOSE_HTTP_TIMEOUT: 600
   DOCKER_BUILDKIT: 0
   COMPOSE_DOCKER_CLI_BUILD: 0
+  POSTGRES_DB: "test_db"
+  POSTGRES_USER: "runner"
+  POSTGRES_PASSWORD: ""
+  POSTGRES_HOST_AUTH_METHOD: "trust"
+  DATABASE_URL: "postgresql://$POSTGRES_USER@postgres/$POSTGRES_DB"
+
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - venv/
+    - .cache/pip
 
 stages:
   - build
