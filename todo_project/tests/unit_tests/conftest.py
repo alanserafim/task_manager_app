@@ -1,6 +1,6 @@
 import pytest
 from flask import Flask
-from app import app, db
+from todo_project import app, db
 from models import User, Task
 
 @pytest.fixture(scope='module')
